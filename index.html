@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RentalKu — Sistem Manajemen Sewa Kendaraan (Motor, Mobil, Sepeda)</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Sistem manajemen rental kendaraan terpadu untuk Mobil, Motor, dan Sepeda dengan GPS tracking real-time, brankas jaminan identitas fisik, dan inspeksi serah terima digital.">
+  <link rel="icon" type="image/jpeg" href="/images/logo.jpg">
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/src/styles/main.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar Navigation (Back-Office Admin) -->
+    <aside class="sidebar" id="appSidebar">
+      <div class="sidebar-brand">
+        <img src="/images/logo.jpg" alt="RentalKu Logo" class="brand-logo-img">
+        <div class="brand-text">
+          <h1>RentalKu</h1>
+          <p>Fleet & Rental System</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <!-- Section: IKHTISAR -->
+        <div>
+          <div class="nav-section-title">IKHTISAR</div>
+          <ul class="nav-item-list">
+            <li>
+              <a class="nav-link active" data-target="dashboard">
+                <i data-lucide="layout-dashboard"></i> Dashboard
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Section: ARMADA -->
+        <div>
+          <div class="nav-section-title">ARMADA KENDARAAN</div>
+          <ul class="nav-item-list">
+            <li>
+              <a class="nav-link" data-target="fleet">
+                <i data-lucide="car"></i> Katalog & Unit Fisik
+              </a>
+            </li>
+            <li>
+              <a class="nav-link" data-target="calendar">
+                <i data-lucide="calendar"></i> Kalender Ketersediaan
+              </a>
+            </li>
+            <li>
+              <a class="nav-link" data-target="gps">
+                <i data-lucide="compass"></i> GPS Tracking Live
+                <span class="nav-badge live-indicator">LIVE</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Section: RESERVASI & SERAH TERIMA -->
+        <div>
+          <div class="nav-section-title">RESERVASI & PELANGGAN</div>
+          <ul class="nav-item-list">
+            <li>
+              <a class="nav-link" data-target="reservations">
+                <i data-lucide="calendar"></i> Booking Lepas Kunci
+              </a>
+            </li>
+            <li>
+              <a class="nav-link" data-target="customers">
+                <i data-lucide="users"></i> Data Penyewa (KTP/SIM)
+              </a>
+            </li>
+            <li>
+              <a class="nav-link" data-target="handover">
+                <i data-lucide="file-check-2"></i> Handover (Serah Terima)
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Section: KEUANGAN & JAMINAN DOKUMEN -->
+        <div>
+          <div class="nav-section-title">KEUANGAN & JAMINAN</div>
+          <ul class="nav-item-list">
+            <li>
+              <a class="nav-link" data-target="payments">
+                <i data-lucide="credit-card"></i> Invoices & Transaksi
+              </a>
+            </li>
+            <li>
+              <a class="nav-link" data-target="vault">
+                <i data-lucide="lock"></i> Brankas Jaminan KTP/SIM
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Section: MAINTENANCE & ASURANSI -->
+        <div>
+          <div class="nav-section-title">PERAWATAN & ASURANSI</div>
+          <ul class="nav-item-list">
+            <li>
+              <a class="nav-link" data-target="maintenance">
+                <i data-lucide="wrench"></i> Servis & Klaim Asuransi
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <!-- Sidebar Footer: Single Branch Indicator -->
+      <div class="sidebar-footer">
+        <div class="branch-indicator">
+          <div class="branch-icon">
+            <i data-lucide="map-pin"></i>
+          </div>
+          <div class="branch-info">
+            <span class="branch-name" id="sidebarBranchName">RentalKu Central Hub</span>
+            <span class="branch-badge">1 Cabang Garasi Utama</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      <!-- Topbar Header -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="btn btn-secondary btn-icon" id="menuToggle" style="display: none;">
+            <i data-lucide="menu"></i>
+          </button>
+          <div class="topbar-title">
+            <h2 id="topbarPageTitle">Dashboard Operasional</h2>
+            <span id="topbarBreadcrumb">RentalKu • Single Branch Lepas Kunci</span>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <!-- View Switcher (Admin Dashboard vs Customer Public Portal) -->
+          <div class="mode-switcher">
+            <button class="mode-btn active" data-mode="admin">
+              <i data-lucide="layout-dashboard"></i> Back-Office Admin
+            </button>
+            <button class="mode-btn" data-mode="public">
+              <i data-lucide="external-link"></i> Situs Publik (Customer)
+            </button>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 10px; margin-left: 8px;">
+            <button class="btn btn-secondary btn-icon" id="btnTopAlerts" title="Notifikasi">
+              <i data-lucide="bell"></i>
+            </button>
+            <div style="display: flex; align-items: center; gap: 10px; padding: 4px 10px; background: var(--bg-surface-elevated); border-radius: var(--radius-full); border: 1px solid var(--border-subtle);">
+              <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--gradient-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; color: #fff;">
+                OP
+              </div>
+              <span style="font-size: 0.8rem; font-weight: 600; color: #fff; margin-right: 4px;">Admin Rendi</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Container -->
+      <main class="page-container" id="mainContent">
+        <!-- Rendered dynamically by current route -->
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
