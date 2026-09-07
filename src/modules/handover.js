@@ -3,6 +3,7 @@ import { store } from '../data/store.js';
 import { SimpleSignaturePad } from '../utils/signaturePad.js';
 import { formatDateTime } from '../utils/formatters.js';
 import { initIcons } from '../utils/icons.js';
+import { showDialogAlert } from '../utils/dialog.js';
 import confetti from 'canvas-confetti';
 
 export function renderHandover(container, preselectedBookingId = null) {
@@ -311,10 +312,13 @@ export function renderHandover(container, preselectedBookingId = null) {
       origin: { y: 0.6 }
     });
 
-    alert(isReturnMode 
-      ? `Pengembalian unit selesai! Status booking telah diselesaikan, dan dokumen jaminan di ${activeBooking.physicalDocsLocker} siap diserahkan kembali kepada penyewa.`
-      : `Serah terima Pickup selesai! Status booking sekarang 'Berlangsung' dan unit telah aktif disewa.`
-    );
+    showDialogAlert({
+      title: isReturnMode ? 'Pengembalian Selesai' : 'Serah Terima Pickup Selesai',
+      message: isReturnMode 
+        ? `Pengembalian unit berhasil diverifikasi! Status booking telah selesai, dan dokumen identitas fisik asli di ${activeBooking.physicalDocsLocker} siap diserahkan kembali kepada penyewa.`
+        : `Proses serah terima Pickup berhasil! Status booking kini 'Berlangsung' dan unit aktif disewa lepas kunci.`,
+      type: 'success'
+    });
 
     renderHandover(container, activeBooking.id);
   });

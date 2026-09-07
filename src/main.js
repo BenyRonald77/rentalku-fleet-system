@@ -11,6 +11,7 @@ import { renderPayments } from './modules/payments.js';
 import { renderMaintenance } from './modules/maintenance.js';
 import { renderPublicPortal } from './modules/publicPortal.js';
 import { initIcons } from './utils/icons.js';
+import { setupGlobalDialogOverrides } from './utils/dialog.js';
 
 let currentRoute = 'dashboard';
 let currentMode = 'admin'; // 'admin' | 'public'
@@ -142,6 +143,8 @@ function switchMode(mode) {
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
+  setupGlobalDialogOverrides();
+
   setupNavigation(
     (route) => navigate(route),
     (mode) => switchMode(mode)

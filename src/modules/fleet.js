@@ -310,16 +310,17 @@ export function renderFleet(container, { onOpenNewBooking }) {
         status: 'Tersedia',
         odometerKm: parseInt(container.querySelector('#newUnitOdo').value) || 0,
         fuelLevelPercent: parseInt(container.querySelector('#newUnitFuel').value) || 100,
-        gpsId: container.querySelector('#newUnitGps').value.trim() || null,
-        currentLocation: cat && cat.category !== 'Sepeda' ? {
+        gpsId: container.querySelector('#newUnitGps').value.trim() || 
+          (cat && cat.category === 'Sepeda' ? `GPS-BYC-${units.length + 1}` : cat && cat.category === 'Motor' ? `GPS-MTR-${units.length + 1}` : `GPS-CAR-${units.length + 1}`),
+        currentLocation: {
           lat: -8.6852,
           lng: 115.2476,
           speedKmh: 0,
           heading: 0,
-          engineStatus: 'OFF',
+          engineStatus: cat && cat.category === 'Sepeda' ? 'Standby / Parkir' : 'OFF',
           isOutOfBounds: false,
           lastUpdate: new Date().toISOString()
-        } : null
+        }
       };
 
       const currentUnits = store.getUnits();

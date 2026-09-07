@@ -2,6 +2,7 @@
 import { store } from '../data/store.js';
 import { formatRupiah, formatDateTime } from '../utils/formatters.js';
 import { initIcons } from '../utils/icons.js';
+import { showDialogAlert, showDialogConfirm } from '../utils/dialog.js';
 import confetti from 'canvas-confetti';
 
 export function renderPayments(container, initialTab = 'invoices') {
@@ -294,11 +295,24 @@ export function renderPayments(container, initialTab = 'invoices') {
 
   // Release locker button action
   container.querySelectorAll('.btn-release-locker').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const lockerNo = btn.dataset.locker;
-      if (confirm(`Serahkan kembali dokumen fisik asli di ${lockerNo} kepada pelanggan?`)) {
+      const confirmed = await showDialogConfirm({
+        title: 'Konfirmasi Penyerahan Dokumen',
+        message: `Serahkan kembali dokumen fisik asli di ${lockerNo} kepada pelanggan? Status loker akan kembali kosong.`,
+        confirmText: 'Ya, Serahkan Kembali',
+        cancelText: 'Batal',
+        type: 'warning'
+      });
+
+      if (confirmed) {
         store.releaseLocker(lockerNo);
         renderPayments(container, 'vault');
+        showDialogAlert({
+          title: 'Dokumen Berhasil Dikembalikan',
+          message: `Dokumen fisik di ${lockerNo} telah diserahkan kembali kepada pelanggan dan loker siap digunakan.`,
+          type: 'success'
+        });
       }
     });
   });
@@ -310,7 +324,11 @@ export function renderPayments(container, initialTab = 'invoices') {
       spread: 70,
       origin: { y: 0.6 }
     });
-    alert('Simulasi Berhasil: Transaksi QRIS berhasil diverifikasi sistem kasir!');
+    showDialogAlert({
+      title: 'Pembayaran QRIS Sukses',
+      message: 'Notifikasi Webhook Diterima: Transaksi QRIS berhasil diverifikasi lunas oleh sistem kasir!',
+      type: 'success'
+    });
   });
 
   // Print invoice modal logic

@@ -2,6 +2,7 @@
 import { store } from '../data/store.js';
 import { formatRupiah, formatDateTime, calculateDuration } from '../utils/formatters.js';
 import { initIcons } from '../utils/icons.js';
+import { showDialogAlert, showBookingSuccessDialog } from '../utils/dialog.js';
 import confetti from 'canvas-confetti';
 
 export function renderPublicPortal(container, { onSwitchToAdmin }) {
@@ -298,7 +299,11 @@ export function renderPublicPortal(container, { onSwitchToAdmin }) {
     container.querySelector('#btnTrackBooking')?.addEventListener('click', () => {
       const code = container.querySelector('#inputTrackBooking')?.value;
       if (!code) {
-        alert('Mohon masukkan Kode Booking Anda!');
+        showDialogAlert({
+          title: 'Kode Booking Diperlukan',
+          message: 'Mohon ketikkan Kode Booking Anda (contoh: RK-AVZ-991) untuk melacak status sewa.',
+          type: 'warning'
+        });
         return;
       }
 
@@ -521,7 +526,7 @@ export function renderPublicPortal(container, { onSwitchToAdmin }) {
 
       pubModal.classList.remove('open');
 
-      alert(`Selamat! Booking Anda berhasil diterbitkan!\n\nKode Booking: ${newBooking.bookingCode}\nUnit: ${newBooking.unitModel}\nLoker Jaminan: ${newBooking.physicalDocsLocker}\n\nSilakan bawa KTP & SIM asli Anda saat penyerahan unit di ${branch.name}.`);
+      showBookingSuccessDialog(newBooking, branch);
     });
   }
 

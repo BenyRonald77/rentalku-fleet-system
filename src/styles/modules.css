@@ -212,9 +212,9 @@
 /* --- 3. GPS TRACKING REAL-TIME --- */
 .gps-wrapper {
   display: grid;
-  grid-template-columns: 340px 1fr;
+  grid-template-columns: 370px 1fr;
   gap: 20px;
-  height: 720px;
+  height: 750px;
   border-radius: var(--radius-lg);
   overflow: hidden;
   border: 1px solid var(--border-subtle);
@@ -233,20 +233,96 @@
   border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
+  height: 100%;
 }
 
 .gps-header {
-  padding: 18px 20px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--border-subtle);
+  background: rgba(15, 21, 35, 0.6);
+}
+
+.gps-search-box {
+  position: relative;
+  margin-top: 8px;
+}
+
+.gps-search-input {
+  width: 100%;
+  padding: 7px 10px 7px 32px;
+  font-size: 0.8rem;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: #fff;
+  outline: none;
+  transition: var(--transition-fast);
+}
+
+.gps-search-input:focus {
+  border-color: var(--accent-cyan);
+}
+
+.gps-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+}
+
+.gps-filter-tabs {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.gps-filter-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.gps-filter-btn {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.gps-filter-btn:hover {
+  color: #fff;
+  border-color: var(--border-medium);
+}
+
+.gps-filter-btn.active {
+  background: rgba(6, 182, 212, 0.16);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  font-weight: 700;
 }
 
 .gps-list {
   padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   overflow-y: auto;
+  flex: 1;
 }
 
 .gps-vehicle-card {
@@ -261,6 +337,7 @@
 .gps-vehicle-card:hover, .gps-vehicle-card.active {
   border-color: var(--accent-cyan);
   background: rgba(6, 182, 212, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .gps-vehicle-title {
@@ -273,8 +350,22 @@
 .gps-plate {
   font-family: var(--font-mono);
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   color: var(--text-primary);
+}
+
+.gps-renter-banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34d399;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  margin-top: 6px;
+  font-weight: 600;
 }
 
 .gps-telemetry-row {
@@ -284,7 +375,7 @@
   font-size: 0.72rem;
   color: var(--text-muted);
   margin-top: 8px;
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.3);
   padding: 6px 8px;
   border-radius: var(--radius-sm);
 }
@@ -300,12 +391,22 @@
   width: 100%;
   height: 100%;
   min-height: 480px;
+  background: #0b101b;
 }
 
 #gpsMap {
   width: 100%;
   height: 100%;
   z-index: 1;
+  background-color: #0b101b !important;
+}
+
+#gpsMap .leaflet-tile {
+  filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7) !important;
+}
+
+#gpsMap .leaflet-container {
+  background: #0b101b !important;
 }
 
 .gps-hud-overlay {
@@ -313,18 +414,18 @@
   top: 16px;
   right: 16px;
   z-index: 10;
-  background: rgba(15, 21, 35, 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(15, 21, 35, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-md);
-  padding: 16px;
-  max-width: 320px;
+  padding: 18px;
+  max-width: 340px;
   box-shadow: var(--shadow-lg);
 }
 
 .hud-title {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -350,18 +451,20 @@
 }
 
 /* Custom Leaflet Map Markers */
-.custom-car-marker, .custom-bike-marker {
+.custom-car-marker, .custom-bike-marker, .custom-bicycle-marker {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   color: #fff;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7);
   border: 2px solid #fff;
   position: relative;
   transition: transform 0.5s ease-out;
+  cursor: pointer;
 }
 
 .custom-car-marker {
@@ -372,18 +475,34 @@
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 }
 
+.custom-bicycle-marker {
+  background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
+}
+
 .marker-pulse {
   position: absolute;
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 2px solid var(--accent-cyan);
   animation: markerPulse 2s infinite;
+  pointer-events: none;
+}
+
+.pulse-car {
+  border: 2px solid #06b6d4;
+}
+
+.pulse-bike {
+  border: 2px solid #10b981;
+}
+
+.pulse-bicycle {
+  border: 2px solid #d946ef;
 }
 
 @keyframes markerPulse {
-  0% { transform: scale(1); opacity: 0.8; }
-  100% { transform: scale(2); opacity: 0; }
+  0% { transform: scale(1); opacity: 0.9; }
+  100% { transform: scale(2.2); opacity: 0; }
 }
 
 /* --- 4. DIGITAL SIGNATURE & HANDOVER --- */

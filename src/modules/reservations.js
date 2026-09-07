@@ -2,6 +2,7 @@
 import { store } from '../data/store.js';
 import { formatRupiah, formatDateTime, calculateDuration } from '../utils/formatters.js';
 import { initIcons } from '../utils/icons.js';
+import { showDialogAlert, showBookingSuccessDialog } from '../utils/dialog.js';
 import confetti from 'canvas-confetti';
 
 export function renderReservations(container, { onOpenNewBooking, onNavigate }) {
@@ -383,7 +384,11 @@ export function renderReservations(container, { onOpenNewBooking, onNavigate }) 
     const ins = store.getInsurancePackages().find(i => i.id === insId);
 
     if (!unit) {
-      alert('Mohon pilih unit fisik kendaraan yang siap!');
+      showDialogAlert({
+        title: 'Unit Belum Dipilih',
+        message: 'Mohon pilih unit fisik kendaraan yang siap digunakan di garasi pusat.',
+        type: 'warning'
+      });
       return;
     }
 
@@ -422,14 +427,9 @@ export function renderReservations(container, { onOpenNewBooking, onNavigate }) 
       bookingStatus: 'Terkonfirmasi'
     });
 
-    confetti({
-      particleCount: 80,
-      spread: 60,
-      origin: { y: 0.6 }
-    });
-
     modal.classList.remove('open');
     renderReservations(container, { onOpenNewBooking, onNavigate });
+    showBookingSuccessDialog(newBooking, store.getBranch());
   });
 
   return { openBookingModal };

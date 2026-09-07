@@ -21,15 +21,64 @@ class Store {
 
   initStorage() {
     const currentVersion = localStorage.getItem('rentalku_version');
+    const existingBookings = JSON.parse(localStorage.getItem('rentalku_bookings')) || [];
+    const existingCustomers = JSON.parse(localStorage.getItem('rentalku_customers')) || [];
+    const existingUnits = JSON.parse(localStorage.getItem('rentalku_units')) || [];
+
     if (currentVersion !== DATA_VERSION) {
-      // Refresh to newly expanded fleet catalog and units
       localStorage.setItem('rentalku_version', DATA_VERSION);
       localStorage.setItem('rentalku_branch', JSON.stringify(INITIAL_BRANCH));
       localStorage.setItem('rentalku_catalog', JSON.stringify(INITIAL_CATALOG));
-      localStorage.setItem('rentalku_units', JSON.stringify(INITIAL_UNITS));
-      localStorage.setItem('rentalku_customers', JSON.stringify(INITIAL_CUSTOMERS));
+      
+      // Preserve user-created bookings that aren't in INITIAL_BOOKINGS
+      const initialBookingIds = new Set(INITIAL_BOOKINGS.map(b => b.id));
+      const userBookings = existingBookings.filter(b => !initialBookingIds.has(b.id));
+      const mergedBookings = [...userBookings, ...INITIAL_BOOKINGS];
+      localStorage.setItem('rentalku_bookings', JSON.stringify(mergedBookings));
+
+      // Preserve user-created customers
+      const initialCustIds = new Set(INITIAL_CUSTOMERS.map(c => c.id));
+      const userCusts = existingCustomers.filter(c => !initialCustIds.has(c.id));
+      const mergedCustomers = [...INITIAL_CUSTOMERS, ...userCusts];
+      localStorage.setItem('rentalku_customers', JSON.stringify(mergedCustomers));
+
+      // Reconcile units: start with INITIAL_UNITS (21 units with GPS)
+      let units = [...INITIAL_UNITS];
+
+      // If user had existing units added via UI, retain them
+      const initialUnitIds = new Set(INITIAL_UNITS.map(u => u.id));
+      const userUnits = existingUnits.filter(u => !initialUnitIds.has(u.id));
+      if (userUnits.length > 0) {
+        units = [...units, ...userUnits];
+      }
+
+      // Mark units as 'Disewa' and activate GPS for all active bookings
+      mergedBookings.forEach(b => {
+        if (b.unitId && (b.bookingStatus === 'Terkonfirmasi' || b.bookingStatus === 'Berlangsung')) {
+          const idx = units.findIndex(u => u.id === b.unitId);
+          if (idx !== -1) {
+            const u = units[idx];
+            const isBicycle = u.category === 'Sepeda';
+            const isMotor = u.category === 'Motor';
+            units[idx] = {
+              ...u,
+              status: 'Disewa',
+              currentLocation: {
+                lat: isBicycle ? (-8.6940 + (Math.random() - 0.5) * 0.015) : isMotor ? (-8.6750 + (Math.random() - 0.5) * 0.02) : (-8.6850 + (Math.random() - 0.5) * 0.02),
+                lng: isBicycle ? (115.2635 + (Math.random() - 0.5) * 0.015) : isMotor ? (115.2200 + (Math.random() - 0.5) * 0.02) : (115.2100 + (Math.random() - 0.5) * 0.02),
+                speedKmh: isBicycle ? 18 : isMotor ? 36 : 45,
+                heading: 140,
+                engineStatus: isBicycle ? (u.modelName.includes('E-Bike') ? 'Motor Listrik Assist ON' : 'Gowes Aktif (Pedaling)') : 'ON',
+                isOutOfBounds: false,
+                lastUpdate: new Date().toISOString()
+              }
+            };
+          }
+        }
+      });
+      localStorage.setItem('rentalku_units', JSON.stringify(units));
+
       localStorage.setItem('rentalku_vault', JSON.stringify(INITIAL_VAULT_LOCKERS));
-      localStorage.setItem('rentalku_bookings', JSON.stringify(INITIAL_BOOKINGS));
       localStorage.setItem('rentalku_handovers', JSON.stringify(INITIAL_HANDOVERS));
       localStorage.setItem('rentalku_services', JSON.stringify(INITIAL_SERVICES));
       localStorage.setItem('rentalku_claims', JSON.stringify(INITIAL_DAMAGE_CLAIMS));
@@ -62,6 +111,60 @@ class Store {
     }
     if (!localStorage.getItem('rentalku_claims')) {
       localStorage.setItem('rentalku_claims', JSON.stringify(INITIAL_DAMAGE_CLAIMS));
+    }
+
+    // Secondary reconciliation to ensure every unit has GPS and active bookings are synced
+    this.reconcileGpsAndBookings();
+  }
+
+  reconcileGpsAndBookings() {
+    let units = JSON.parse(localStorage.getItem('rentalku_units')) || [];
+    const bookings = JSON.parse(localStorage.getItem('rentalku_bookings')) || [];
+    let changed = false;
+
+    const activeBookingsMap = {};
+    bookings.forEach(b => {
+      if (b.unitId && (b.bookingStatus === 'Terkonfirmasi' || b.bookingStatus === 'Berlangsung')) {
+        activeBookingsMap[b.unitId] = b;
+      }
+    });
+
+    units = units.map(u => {
+      const isBicycle = u.category === 'Sepeda';
+      const isMotor = u.category === 'Motor';
+      const activeBooking = activeBookingsMap[u.id];
+      const isDisewa = Boolean(activeBooking) || u.status === 'Disewa';
+
+      let loc = u.currentLocation;
+      if (!loc || !u.gpsId || (activeBooking && u.status !== 'Disewa')) {
+        changed = true;
+      }
+
+      const defaultGpsId = isBicycle ? `GPS-BYC-${u.id.replace('U-', '')}` : isMotor ? `GPS-MTR-${u.id.replace('U-', '')}` : `GPS-CAR-${u.id.replace('U-', '')}`;
+      const gpsId = u.gpsId || defaultGpsId;
+
+      if (!loc) {
+        loc = {
+          lat: isDisewa ? (-8.6940 + (Math.random() - 0.5) * 0.015) : -8.6852,
+          lng: isDisewa ? (115.2635 + (Math.random() - 0.5) * 0.015) : 115.2476,
+          speedKmh: isDisewa ? (isBicycle ? 18 : isMotor ? 36 : 45) : 0,
+          heading: isDisewa ? 140 : 0,
+          engineStatus: isDisewa ? (isBicycle ? (u.modelName.includes('E-Bike') ? 'Motor Listrik Assist ON' : 'Gowes Aktif (Pedaling)') : 'ON') : (isBicycle ? 'Standby / Parkir' : 'OFF'),
+          isOutOfBounds: false,
+          lastUpdate: new Date().toISOString()
+        };
+      }
+
+      return {
+        ...u,
+        status: isDisewa ? 'Disewa' : u.status,
+        gpsId,
+        currentLocation: loc
+      };
+    });
+
+    if (changed) {
+      localStorage.setItem('rentalku_units', JSON.stringify(units));
     }
   }
 
@@ -118,6 +221,11 @@ class Store {
     return this.getBookings().find(b => b.bookingCode?.toUpperCase() === code.trim().toUpperCase());
   }
 
+  getActiveBookingForUnit(unitId) {
+    const bookings = this.getBookings();
+    return bookings.find(b => b.unitId === unitId && (b.bookingStatus === 'Terkonfirmasi' || b.bookingStatus === 'Berlangsung'));
+  }
+
   getHandovers() {
     return JSON.parse(localStorage.getItem('rentalku_handovers')) || [];
   }
@@ -154,9 +262,48 @@ class Store {
     bookings.unshift(newBooking);
     localStorage.setItem('rentalku_bookings', JSON.stringify(bookings));
 
-    // Update unit status to Disewa if immediately active
-    if (newBooking.unitId && newBooking.bookingStatus === 'Berlangsung') {
-      this.updateUnit(newBooking.unitId, { status: 'Disewa' });
+    // Immediately set unit to Disewa and activate real-time GPS tracking coordinates
+    if (newBooking.unitId) {
+      const unit = this.getUnitById(newBooking.unitId);
+      if (unit) {
+        const isBicycle = unit.category === 'Sepeda';
+        const isMotor = unit.category === 'Motor';
+
+        const activeGps = isBicycle ? {
+          lat: -8.6940 + (Math.random() - 0.5) * 0.015,
+          lng: 115.2635 + (Math.random() - 0.5) * 0.015,
+          speedKmh: Math.floor(14 + Math.random() * 10),
+          heading: 140,
+          engineStatus: unit.modelName.includes('E-Bike') ? 'Motor Listrik Assist ON' : 'Gowes Aktif (Pedaling)',
+          isOutOfBounds: false,
+          lastUpdate: new Date().toISOString()
+        } : isMotor ? {
+          lat: -8.6750 + (Math.random() - 0.5) * 0.02,
+          lng: 115.2200 + (Math.random() - 0.5) * 0.02,
+          speedKmh: Math.floor(32 + Math.random() * 15),
+          heading: 180,
+          engineStatus: 'ON',
+          isOutOfBounds: false,
+          lastUpdate: new Date().toISOString()
+        } : {
+          lat: -8.6850 + (Math.random() - 0.5) * 0.02,
+          lng: 115.2100 + (Math.random() - 0.5) * 0.02,
+          speedKmh: Math.floor(40 + Math.random() * 20),
+          heading: 130,
+          engineStatus: 'ON',
+          isOutOfBounds: false,
+          lastUpdate: new Date().toISOString()
+        };
+
+        this.updateUnit(newBooking.unitId, {
+          status: 'Disewa',
+          gpsId: unit.gpsId || `GPS-${unit.category.slice(0, 3).toUpperCase()}-${Math.floor(10 + Math.random() * 90)}`,
+          currentLocation: {
+            ...(unit.currentLocation || {}),
+            ...activeGps
+          }
+        });
+      }
     }
 
     // Assign vault locker if physical docs deposited
@@ -323,12 +470,27 @@ class Store {
 
   toggleEngineKill(unitId) {
     const unit = this.getUnitById(unitId);
-    if (!unit || !unit.currentLocation) return;
-    const newStatus = unit.currentLocation.engineStatus === 'ON' ? 'OFF (Immobilized)' : 'ON';
-    this.updateGpsTelemetry(unitId, {
-      engineStatus: newStatus,
-      speedKmh: newStatus === 'ON' ? 25 : 0
-    });
+    if (!unit || !unit.currentLocation) return null;
+    
+    if (unit.category === 'Sepeda') {
+      const isLocked = unit.currentLocation.engineStatus.includes('Terkunci') || unit.currentLocation.engineStatus.includes('Standby');
+      const newStatus = isLocked 
+        ? (unit.modelName.includes('E-Bike') ? 'Motor Listrik Assist ON' : 'Gowes Aktif (Pedaling)')
+        : 'Terkunci (Gembok Smart Lock Aktif)';
+      this.updateGpsTelemetry(unitId, {
+        engineStatus: newStatus,
+        speedKmh: isLocked ? (unit.modelName.includes('E-Bike') ? 20 : 15) : 0
+      });
+      return { isLocked: !isLocked, status: newStatus, isBicycle: true };
+    } else {
+      const isEngineOn = unit.currentLocation.engineStatus === 'ON';
+      const newStatus = isEngineOn ? 'OFF (Immobilized)' : 'ON';
+      this.updateGpsTelemetry(unitId, {
+        engineStatus: newStatus,
+        speedKmh: newStatus === 'ON' ? 32 : 0
+      });
+      return { isEngineOn: !isEngineOn, status: newStatus, isBicycle: false };
+    }
   }
 }
 

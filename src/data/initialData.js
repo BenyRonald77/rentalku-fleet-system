@@ -1,5 +1,5 @@
 // Initial database seed for RentalKu - Expanded Fleet Edition
-export const DATA_VERSION = 'v2.0';
+export const DATA_VERSION = 'v2.5';
 
 export const INITIAL_BRANCH = {
   id: 'BR-01',
@@ -559,7 +559,7 @@ export const INITIAL_UNITS = [
     }
   },
 
-  // --- UNIT SEPEDA (Kode Inventaris Fisik & Tarif Per Jam) ---
+  // --- UNIT SEPEDA (Kode Inventaris Fisik, Tarif Per Jam & GPS Tracking Aktif) ---
   {
     id: 'U-15',
     catalogId: 'CAT-BYC-01',
@@ -573,8 +573,16 @@ export const INITIAL_UNITS = [
     status: 'Tersedia',
     odometerKm: 340,
     fuelLevelPercent: 100,
-    gpsId: null,
-    currentLocation: null
+    gpsId: 'GPS-BYC-01',
+    currentLocation: {
+      lat: -8.6852,
+      lng: 115.2476,
+      speedKmh: 0,
+      heading: 0,
+      engineStatus: 'Standby / Parkir',
+      isOutOfBounds: false,
+      lastUpdate: new Date().toISOString()
+    }
   },
   {
     id: 'U-16',
@@ -589,8 +597,16 @@ export const INITIAL_UNITS = [
     status: 'Disewa',
     odometerKm: 510,
     fuelLevelPercent: 100,
-    gpsId: null,
-    currentLocation: null
+    gpsId: 'GPS-BYC-02',
+    currentLocation: {
+      lat: -8.6940,
+      lng: 115.2635, // Sanur Beach Cycling Track
+      speedKmh: 18,
+      heading: 140,
+      engineStatus: 'Gowes Aktif (Pedaling)',
+      isOutOfBounds: false,
+      lastUpdate: new Date().toISOString()
+    }
   },
   {
     id: 'U-17',
@@ -604,9 +620,17 @@ export const INITIAL_UNITS = [
     condition: 'Sangat Baik',
     status: 'Tersedia',
     odometerKm: 180,
-    fuelLevelPercent: 100, // Baterai 100%
-    gpsId: null,
-    currentLocation: null
+    fuelLevelPercent: 100,
+    gpsId: 'GPS-EBK-01',
+    currentLocation: {
+      lat: -8.6852,
+      lng: 115.2476,
+      speedKmh: 0,
+      heading: 0,
+      engineStatus: 'Standby / Parkir',
+      isOutOfBounds: false,
+      lastUpdate: new Date().toISOString()
+    }
   },
   {
     id: 'U-18',
@@ -618,11 +642,19 @@ export const INITIAL_UNITS = [
     year: 2024,
     color: 'Matte Graphite',
     condition: 'Sangat Baik',
-    status: 'Tersedia',
+    status: 'Disewa',
     odometerKm: 220,
-    fuelLevelPercent: 90, // Baterai 90%
-    gpsId: null,
-    currentLocation: null
+    fuelLevelPercent: 90,
+    gpsId: 'GPS-EBK-02',
+    currentLocation: {
+      lat: -8.7070,
+      lng: 115.2530, // Pantai Mertasari
+      speedKmh: 24,
+      heading: 190,
+      engineStatus: 'Motor Listrik Assist ON',
+      isOutOfBounds: false,
+      lastUpdate: new Date().toISOString()
+    }
   },
   {
     id: 'U-19',
@@ -634,11 +666,19 @@ export const INITIAL_UNITS = [
     year: 2024,
     color: 'Racing Green & Tan Leather',
     condition: 'Istimewa / Seperti Baru',
-    status: 'Tersedia',
+    status: 'Disewa',
     odometerKm: 95,
     fuelLevelPercent: 100,
-    gpsId: null,
-    currentLocation: null
+    gpsId: 'GPS-BRM-01',
+    currentLocation: {
+      lat: -8.6912,
+      lng: 115.1685, // Seminyak Area
+      speedKmh: 14,
+      heading: 80,
+      engineStatus: 'Gowes Aktif (Pedaling)',
+      isOutOfBounds: false,
+      lastUpdate: new Date().toISOString()
+    }
   },
   {
     id: 'U-20',
@@ -653,8 +693,16 @@ export const INITIAL_UNITS = [
     status: 'Tersedia',
     odometerKm: 140,
     fuelLevelPercent: 100,
-    gpsId: null,
-    currentLocation: null
+    gpsId: 'GPS-BRM-02',
+    currentLocation: {
+      lat: -8.6852,
+      lng: 115.2476,
+      speedKmh: 0,
+      heading: 0,
+      engineStatus: 'Standby / Parkir',
+      isOutOfBounds: false,
+      lastUpdate: new Date().toISOString()
+    }
   },
   {
     id: 'U-21',
@@ -669,8 +717,16 @@ export const INITIAL_UNITS = [
     status: 'Tersedia',
     odometerKm: 320,
     fuelLevelPercent: 100,
-    gpsId: null,
-    currentLocation: null
+    gpsId: 'GPS-STR-01',
+    currentLocation: {
+      lat: -8.6750,
+      lng: 115.2400,
+      speedKmh: 28,
+      heading: 20,
+      engineStatus: 'Gowes Cepat (Road Cycling)',
+      isOutOfBounds: false,
+      lastUpdate: new Date().toISOString()
+    }
   }
 ];
 
